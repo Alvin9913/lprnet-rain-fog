@@ -1,40 +1,40 @@
-# 车牌识别在雨雾天气下的鲁棒性
+# License Plate Recognition in Rain and Fog
 
-车牌识别模型在晴天数据上表现很好，一遇雨雾就崩。这个项目做的是：**先用代码合成恶劣天气，再把模型在这些数据上重训一遍**。
+A license plate model can score well on clear photos and still fail badly in bad weather. So in this project I first generate the bad weather myself, then train the model on it.
 
-## 思路
+## What I did
 
-1. 用 `cv2` 对原始车牌图片做两种退化：
-   - **雾**：`addWeighted` 把图像与白色图层按强度混合，模拟能见度下降
-   - **雨**：随机生成雨滴线并叠加，模拟雨幕遮挡
-2. 把合成数据并入 CCPD2020 绿牌训练集（**5769 张**），保留原始验证集作为对照。
-3. 用 LPRNet 重新训练，保留 2000 轮、4000 轮与最终三个检查点。
+1. Used `cv2` to degrade the plate images in two ways:
+   - **Fog**: `addWeighted` to blend the image with a white layer, which lowers visibility
+   - **Rain**: draw random rain streak lines on top, which partly covers the characters
+2. Mixed the generated images into the CCPD2020 green-plate training set (**5769 images**) and kept the original validation set for comparison.
+3. Retrained LPRNet and kept three checkpoints: 2000 iterations, 4000 iterations and the final model.
 
-## 本仓库内容
+## What is in this repo
 
 ```
-lprnet-rain-fog.ipynb   天气合成的实现 + 数据路径配置 + 训练启动
-test_LPRNet.py          推理脚本（载入权重、读出车牌字符）
+lprnet-rain-fog.ipynb   the weather synthesis, the data paths, and the training launch
+test_LPRNet.py          inference script (load weights, read out the plate characters)
 weights/
   LPRNet_iter_2000.pth
   LPRNet_iter_4000.pth
   Final_LPRNet_model.pth
 ```
 
-## 诚实说明
+## To be clear about what is mine
 
-- 网络结构与训练主循环来自开源项目 **LPRNet_Pytorch**（作者 aiboy.wei）。我做的是**天气合成 + 数据组织 + 训练与检查点管理**，不是从零写 LPRNet。
-- 训练是通过命令行跑的，所以 notebook 里没有完整的逐 epoch 日志；能验证的结果是三个检查点本身与数据集规模。
-- 具体的识别准确率需要把权重加载回来、在 CCPD2020 测试集上跑一遍才能给，我没有留存那组数字，所以不在这里写。
+- The network and the training loop come from the open source project **LPRNet_Pytorch** (author aiboy.wei). What I did is the **weather synthesis, the data organisation, and running and keeping the training**. I did not write LPRNet from scratch.
+- I ran the training from the command line, so the notebook does not contain a full per-epoch log. What can be checked is the three checkpoints and the size of the dataset.
+- For the accuracy number: I would have to load the weights and run them on the CCPD2020 test set to get it, and I did not keep that number, so I am not writing one here.
 
-## 复现
+## How to reproduce
 
 ```bash
 pip install torch torchvision opencv-python numpy
-# 1. 准备 CCPD2020 绿牌数据（train / val）
-# 2. 跑 notebook 里的天气合成，生成增强后的训练目录
-# 3. 用上游 LPRNet_Pytorch 的 train_LPRNet.py 指向该目录，加载 weights/ 里的检查点继续训练或直接推理
-python test_LPRNet.py --test_img_dirs <测试集> --pretrained_model weights/Final_LPRNet_model.pth
+# 1. get the CCPD2020 green plate data (train / val)
+# 2. run the weather synthesis in the notebook to build the augmented training folder
+# 3. point the upstream train_LPRNet.py at that folder, or load the weights and run inference
+python test_LPRNet.py --test_img_dirs <test set> --pretrained_model weights/Final_LPRNet_model.pth
 ```
 
-`results/` 里是 notebook 输出的一张图。
+`results/` has one figure exported from the notebook.
