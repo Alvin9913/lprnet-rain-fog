@@ -30,7 +30,8 @@ weights/
 ## How to reproduce
 
 ```bash
-pip install torch torchvision opencv-python numpy
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 # 1. get the CCPD2020 green plate data (train / val)
 # 2. run the weather synthesis in the notebook to build the augmented training folder
 # 3. point the upstream train_LPRNet.py at that folder, or load the weights and run inference
