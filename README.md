@@ -39,3 +39,7 @@ python test_LPRNet.py --test_img_dirs <test set> --pretrained_model weights/Fina
 ```
 
 `results/` has one figure exported from the notebook.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
